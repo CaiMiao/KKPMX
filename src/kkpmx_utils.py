@@ -29,8 +29,8 @@ OPT_AUTO = "automatic"
 ALL_YES = "all_yes"
 OPT_INFO = "moreinfo"
 
-VERSION_DATE = "2024-12-01"
-VERSION_TAG = "3.1.4"
+VERSION_DATE = "2025-05-02"
+VERSION_TAG = "3.2.0"
 
 def main_starter(callback, message="Please enter name of PMX input file"):
 	"""
@@ -130,12 +130,19 @@ def write_jsonX(data, path, **kwargs):
 	""" Wraps 'with open(path, "w").write(...)' for json.dumps """
 	with open(path, "w") as f: f.write(json.dumps(data, **kwargs))
 
-def write_json(data, path, indent=True):
+def write_json(data, path, indent=True, limit=None):
 	""" Shorthand for writing a JSON file; Adds '.json' if missing """
 	if not path.endswith(".json"): path += ".json"
+	if limit == 0: indent = False
+	if not indent: limit = None
 	_indent = "\t" if indent else None
-	with open(path, "w") as f:
-		f.write(json.dumps(data, indent=_indent))
+	jsData = json.dumps(data, indent=_indent)
+	if not (limit is None or limit < 1):
+		def jsonIndentLimit(jsonString, iStr, limit):# https://stackoverflow.com/a/72611442
+			rgxPat = re.compile(f'\n({iStr}){{{limit}}}(({iStr})+|(?=(}}|])))')
+			return rgxPat.sub('', jsonString)
+		jsData = jsonIndentLimit(jsData, _indent, limit)
+	with open(path, "w") as f: f.write(jsData)
 
 def parse_Tuple(data, _def):
 	return _def if (re.match(r"\([\d,\.\- ]+\)", data) is None) else eval(data)
@@ -546,6 +553,11 @@ def find_bones(pmx, arr, flag=True, returnIdx=True):
 		else: result.append(None)
 	return result
 
+def get_bone_lambdas(pmx):
+	fb = lambda x: find_bone(pmx, x, True)
+	fbx = lambda x: find_bone(pmx, x, False)
+	return (fb, fbx)
+
 ######
 ## Common (4:Bones)
 #####
@@ -566,9 +578,20 @@ def get_idx_and_name(pmx, nameOrIdx, errFlag=True):
 def rename_bone(pmx, org, newJP, newEN):
 	tmp = find_bone(pmx, org, False)
 	if tmp != -1:
+		if type(newEN) == type(True): newEN = newJP
 		if newJP is not None: pmx.bones[tmp].name_jp = newJP
 		if newEN is not None: pmx.bones[tmp].name_en = newEN
 	return tmp
+
+def rename_bone_pair(pmx, txt_EN, txt_JP):
+	fbx = get_bone_lambdas(pmx)[1]
+	def __rename_bone(pre_JP, sfx_EN):
+		idx = fbx(txt_EN + sfx_EN)
+		if idx != -1:
+			pmx.bones[idx].name_jp = pre_JP + txt_JP
+			pmx.bones[idx].name_en = txt_EN + sfx_EN
+	__rename_bone("左", "L"); __rename_bone("右", "R")
+rename_bone_pair.__doc__ = """ Rename a pairwise bone (Left/Right), using the JP-Prefix 左/右 & EN-Suffix L/R """
 
 def bind_bone(pmx, _arr, last_link=False): ##-- TODO_Test(again): [rigging]
 	from copy import deepcopy
@@ -607,6 +630,7 @@ def set_parent_if_found(pmx, childName, parent, is_rigid=False):
 		pmx.bones[idx].parent_idx = parent
 
 def replace_with_parent(pmx, boneName):
+	""" Replace the parent of this bone with its grandparent """
 	boneIdx = find_or_return_bone(pmx, boneName)
 	if boneIdx == -1: return
 	bone = pmx.bones[boneIdx]

@@ -17,6 +17,8 @@ from kkpmx_utils import Vector3, Matrix
 
 #### Special Morphing
 
+OPT_SFW = "reduceToSFW"
+OPT_SILENT = "runSilent"
 def chooser():
 	## Choose between the options
 	pass
@@ -207,12 +209,21 @@ def simplify_armature(pmx, input_file_name, _opt = { }):
 			weightMap[idx] = first
 		persistList.append(first)
 	##-------
+	flag_SFW = False
+	flag_all = False
 	if util.is_auto():
 		flag_SFW = False
 		flag_all = True
-	else:
+	elif not _opt.get(OPT_SILENT, False):
 		flag_SFW = util.ask_yes_no("Merge certain Bones for SFW export", "n")
 		flag_all = util.is_allYes() or util.ask_yes_no("Simplify everything", "n")
+	flag_Silent = _opt.get(OPT_SILENT, util.is_auto())
+	flag_SFW = _opt.get(OPT_SFW, flag_SFW)
+	def ask_yes_no_ifUser(_msg, _def):
+		_defRet = _def == "y"
+		if flag_Silent: return _defRet
+		return util.ask_yes_no(_msg, _def)
+	
 	##-------
 	## Collect all bones under [start]
 	fullMap = get_children_map(pmx, None, False, True)
@@ -271,9 +282,10 @@ def simplify_armature(pmx, input_file_name, _opt = { }):
 	boneIdx = find_bone(pmx, "cf_s_waist02")
 	flagWaist = False
 	if flag_SFW:
-		RemoveAndMerg(fullMap["cf_d_bust00"])                         ## Chest
+		RemoveAndMerg(fullMap["cf_s_bust00_L"])                         ## Chest
+		RemoveAndMerg(fullMap["cf_s_bust00_R"])                         ## Chest
 		RemoveAndMerg(fullMap.get("cf_J_Vagina_root", []), boneIdx)   ## Nether (true child of cf_s_waist02)
-	if flag_SFW or flag_all or util.ask_yes_no("Simplify waist area", "n"):
+	if flag_SFW or flag_all or ask_yes_no_ifUser("Simplify waist area", "n"):
 		## Nether (actually children of cf_j_waist02 but that is no vertex bone) -- will also merge nether Slots
 		RemoveAndMerg(fullMap.get("cf_d_ana",         []), boneIdx)   ## Butt
 		RemoveAndMerg(fullMap.get("cf_d_kokan",       []), boneIdx)   ## Groin
@@ -290,14 +302,14 @@ def simplify_armature(pmx, input_file_name, _opt = { }):
 	#	if bones[0] != -1: weightMap[bones[1]] = bones[0]; weightMap[bones[2]] = bones[0]
 	
 	
-	if flag_all or util.ask_yes_no("Merge Toe Bones", "n"):
+	if flag_all or ask_yes_no_ifUser("Merge Toe Bones", "n"):
 		flagToes = find_bone(pmx, "cf_j_toes_L", False)
 		RemoveAndMerg(fullMap.get("cf_j_toes_L", []))
 		RemoveAndMerg(fullMap.get("cf_j_toes_R", []))
 		#flagToes = True
 	
 	#--##--#
-	if flag_all or util.ask_yes_no("Simplify non-head slots too", "y"):
+	if flag_all or ask_yes_no_ifUser("Simplify non-head slots too", "y"):
 		for boneIdx in range(len(pmx.bones)):
 			if boneIdx in weightMap: continue
 			bone        = pmx.bones[boneIdx]

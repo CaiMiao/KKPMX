@@ -15,6 +15,7 @@ from kkpmx_handle_overhang import run as runOverhang
 from kkpmx_json_generator import GenerateJsonFile
 from kkpmx_morphs import emotionalize
 import kkpmx_morphs as kkmorph
+import kkpmx_vrc as kkvrc
 
 try:
 	import nuthouse01_core as core
@@ -98,6 +99,7 @@ def get_choices():
 		("",	11, "Slice helper", slice_helper),
 		("",	13, "Draw Shader", PropParser.draw_toon_shader, True),
 		("",	14, "Adjust for Raycast", PropParser.convert_color_for_RayMMD),
+		("",	15, "Export into VRChat-Format", kkvrc.rename_bones_for_export),
 	]
 	for x in [z[3] for z in arr]:
 		if x is None: continue
@@ -1338,7 +1340,8 @@ If all faces of a given material are considered invisible, it will be ignored an
 	careful_mats = '|'.join(["ct_bra", "ct_shorts", "ct_socks", "ct_panst"])
 	careful_mats += '|' + '|'.join(["ct_clothesBot"])
 	fragile_name = '|'.join(["acs_m_necktielong01", "mf_m_primmaterial", "necklace", "cf_m_bodytights", "ls_t_high_neck01", "acs_m_hair_butterfly"])
-	breakin_name = '|'.join(["acs_m_necklace_"])
+	fragile_name += '|' + '|'.join(["uma_school_swimsuit"])
+	breakin_name = '|'.join(["acs_m_necklace_", "cf_m_ami"])
 	def get_uv(w,h,v): return [int(h * (v.uv[1] % 1)), int(w * (v.uv[0] % 1)), 3]
 	
 #> foreach in materials

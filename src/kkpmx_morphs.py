@@ -780,8 +780,9 @@ def combine_standards(pmx): ## Replace EN Name for Standard Morphs.. (but most a
 	######
 	pass##
 
-
-def sort_morphs(pmx):
+OPT_sort_useVRC = "targetVRC"
+OPT_sort_delVMorph = "pruneVMorphs"
+def sort_morphs(pmx, _opt = {}):
 	""" Sort all morphs into groups and add separators """
 	exported  = []; nameExp = "== Export Morphs =="
 	vertices  = []; nameVrt = "== Vocal Components =="
@@ -790,6 +791,11 @@ def sort_morphs(pmx):
 	materials = []; nameMat = "== Material Morphs =="
 	bones     = []; nameExt = "== Extras =="
 	oldMorphs = {}; names = [nameExt, nameGr1, nameGr2, nameMat, nameVrt]
+	
+	flag_vrc = _opt.get(OPT_sort_useVRC, False)
+	flag_vmorph = _opt.get(OPT_sort_delVMorph, False)
+	
+	if flag_vrc: print("=== Sort Morphs ===")
 	
 	#: idk why these cause a KeyError, but lets skip them for now
 	errIdx = []; skipIdx = [];
@@ -812,7 +818,7 @@ def sort_morphs(pmx):
 		if m.name_jp in names: continue ## Ignore headers since they are added back later
 		oldMorphs[m.name_jp] = [i, -1]
 		##-- Keep anything that was added to Extras in it
-		if i in auxArr: bones.append(m); continue
+		if not flag_vrc and i in auxArr: bones.append(m); continue
 		
 		if (m.morphtype == 0): # groups
 			if re.match("\[\w\]", m.name_jp): groups2.append(m)
@@ -821,7 +827,9 @@ def sort_morphs(pmx):
 		elif (m.name_jp == "== Eyeline only =="): groups2.append(m)
 		elif (m.name_jp == "Stretch EyeWhite"): bones.append(m) # vertex
 		elif (m.morphtype == 1): # vertex
-			if re.match("vr[mc]\.", m.name_jp): exported.append(m)
+			if re.match("vr[mc]\.|Brow|Face|Mouth", m.name_jp): exported.append(m)
+			##-- Keep these so that someone can still adjust them if needed
+			elif flag_vrc and re.search("Retract", m.name_jp): exported.append(m)
 			else: vertices.append(m)
 		elif (m.morphtype == 8): materials.append(m) # materials
 		elif (m.morphtype == 9): groups.append(m) # flip
@@ -838,8 +846,8 @@ def sort_morphs(pmx):
 	baseIdx = 0; newMorphs = []
 	## Order: VRC, A E I O U Blink, Material, slots, Extras, Vocals, Groups, Components
 	## List Export \\ Materials \\ Extras \\ Group
-	## TODO: Add some sort of Material Sorter I guess
 	def sorter(baseIdx, _list, _sep = None):
+		if len(_list) == 0: return len(newMorphs)
 		if not _sep is None:
 			newMorphs.append(make_separator(pmx, _sep))
 			baseIdx += 1
@@ -848,11 +856,21 @@ def sort_morphs(pmx):
 			oldMorphs[m.name_jp][1] = baseIdx + i
 		baseIdx = len(newMorphs)
 		return baseIdx
+	if flag_vrc: ## Clear morphs useless for VRC
+		groups = [] # Remove Groups (Regular Vocal Morphs)
+		groups2 = [] # Remove Groups (Detailed Vocal Morphs)
+		materials = [] # Remove Materials
+		bones = [] # Remove Bone & UV Morphs
+		if flag_vmorph: vertices = [] # Remove all sub-parts since they are not needed anymore
 	baseIdx = sorter(baseIdx, exported)           ; skipIdx.append(baseIdx)
 	baseIdx = sorter(baseIdx, materials, nameMat) ; skipIdx.append(baseIdx)
 	baseIdx = sorter(baseIdx, groups, nameGr1)    ; skipIdx.append(baseIdx)
 	baseIdx = sorter(baseIdx, bones, nameExt)     #; skipIdx.append(baseIdx)
 	baseIdx = sorter(baseIdx, groups2, nameGr2)   ; skipIdx.append(baseIdx)
+	if flag_vrc and not flag_vmorph:
+		nameVrt = "== Components for Custom Combination =="
+		newMorphs.append(make_separator(pmx, "-- Delete these if you have no use for them"))
+		baseIdx += 1
 	baseIdx = sorter(baseIdx, vertices, nameVrt)  #; skipIdx.append(baseIdx)
 	
 	morphMap = {a[0]: a[1] for a in oldMorphs.values() if a[1] != -1}
@@ -866,11 +884,14 @@ def sort_morphs(pmx):
 		arr = []
 		for item in frameMap[df.name_jp]:
 			baseList = find_morph if item[0] == 1 else find_bone
-			arr.append([item[0], baseList(pmx, item[1])])
+			if flag_vrc:
+				_idx =  baseList(pmx, item[1], False)
+				if _idx != -1: arr.append([item[0], _idx])
+			else: arr.append([item[0], baseList(pmx, item[1])])
 		df.items = arr
 	
 	#--- After it was sorted, fix this specific frame as well
-	addExtraVocals(pmx)
+	if not flag_vrc: addExtraVocals(pmx)
 
 
 ##############

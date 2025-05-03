@@ -1773,6 +1773,7 @@ shader_dict = {
 	"AIT/Item": "item", ## ALL OF THE TEXTURES, 15 colors for whatever reason, and like 30 parameters.
 	## WAY TOO MANY OPTIONS
 	"KKUTS": "skin",
+	"KKUTS_Tess": "item",
 	"KKUTShair": "hair",
 	"KKUTSeyew": "item",
 	"KKUTSitem": "item",

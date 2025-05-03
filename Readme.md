@@ -114,6 +114,24 @@ The model should be (almost) ready, but some last adjustments have to be done ma
  0. [Edit(E)] -> Plugin(P) -> User -> Semi-Standard Bone Plugin -> Semi-Standard Bones (PMX) -> default or all (except `[Camera Bone]`)
  0. Go to the [TransformView (F9)] -> Search for [bounce] -> Set to 100% -> Menu=[File]: Update Model
 
+## Alternative chain of actions
+
+
+You can also do this whole process a bit more 'guided'.
+
+ 0. Start KKPMX_core.exe, select option [(1) All-in-one converter], provide the model, and press 'n'.
+ 0. The 1st option asks if each [Step] should be stored as individual model (default Yes).
+ 0. The 2nd option asks if verbose output should be logged (default No)
+ 0. The 3rd option asks if most actions should auto-process or always manual (default Yes)
+ 0. Step [0] and [1] then clean up several artifacts and configure the plugin json.
+ 0. It also provides options to only reprocess the body (and/or only the eyes), or to skip regenerating all images
+ 0. Step [2] is responsible for cleanup up invisible vertices - Here is asked to pause when deleting 'too much' (and decide to skip the material)
+ 0. Step [3] configures some physics, and asks if unused physics should be cleaned up automized or not.
+ 0. Step [4] asks for configurable grouping by accessory slots, else one morph per material is created.
+ 0. Step [5] requests input of the close value of Eye-Morphs (default 0.66), aka the %-value on which 'blink' is properly closed on the model.
+ 0. Step [6] performs general cleanup over the whole model
+ 0. Step [7] then asks if NSFW bones should be merged into oblivion or stay independent.
+
 ## tl;dr: Minimum steps to make the exported model work immediately
 
 
@@ -575,3 +593,21 @@ Most modes will always create a new file and append a suffix (see [Output]).
 >  -  - Set SpecularColor to the color found in the corresponding 'SpecularColor' parameter, or 'Color' if not found.
 >  
 >  `[Output]`: PMX file '`[modelname]`_toon.pmx'
+
+### (23)   Export into VRChat-Format
+
+>  - Removes NSFW Bones for VRC ToS compliance
+>  - Rename Armature for Humanoid Skeleton
+>  - Reorder into expected Hierarchy
+>  - Merges most body/facial bones as required
+>    - Accessories are left in as-is as an exercise for the user
+>  - Assembles basic morphs for VRC (AEIOU Blink Smile)
+>  - Converts all Groups Morphs into Vertex Morphs
+>  - Removes all non-Vertex Morphs
+>  
+>  `[Options]` (at the end):
+>  - Asks if Group-Components should be deleted or kept
+>  - Asks if all Physics should be deleted
+>  - Asks if all Displayframes should be deleted
+>  
+>  `[Output]`: PMX file '`[modelname]`_export.pmx'
