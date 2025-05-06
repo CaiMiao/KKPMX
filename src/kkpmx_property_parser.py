@@ -420,8 +420,8 @@ def __parse_json_file(pmx, data: dict, root: str):
 			elif not DEBUG_RUN:
 				msgs['no_action'].append(msgsPre + mat.name_jp + f" ({attr[GROUP]})")
 				print(">--> [MissingAction]: " + msgs['no_action'][-1])
-				else: exit()
-				if util.is_prod():  parseDict["item"](pmx, mat, attr)
+			else: exit()
+			if util.is_prod():  parseDict["item"](pmx, mat, attr)
 		except Exception as err:
 			print("--- Error while processing this Material")
 			for (k,v) in attr.items():

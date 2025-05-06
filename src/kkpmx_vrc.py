@@ -263,7 +263,8 @@ def rename_bones_for_export(pmx, input_file_name):
 		print(f"==== Stage 0-pre: Rerun Simplify-lite")
 		spec_opt = {
 			kkspec.OPT_SILENT: True,
-			kkspec.OPT_SFW: True,
+			# kkspec.OPT_SFW: True,
+			kkspec.OPT_SFW: False, # MOD: NSFW 
 			"soloMode": False,
 			"fullClean": True,
 		}
@@ -410,54 +411,60 @@ def rename_bones_for_export(pmx, input_file_name):
 			replace_with_parent("cf_hit_wrist_R") ## Frees wrist_twist R2
 			replace_with_parent("a_n_wrist_L") ## Frees wrist_twist L3
 			replace_with_parent("a_n_wrist_R") ## Frees wrist_twist R3
-			#####--- Fix Chest
-			fbx = util.get_bone_lambdas(pmx)[1]
-			addToIdx("cf_d_bust00", "UpperChest" if "UpperChest" in nameMap else "Chest")
-			#- Move Main Physic
-			util.set_parent_if_found(pmx, "cf_hit_bust02_L", "cf_s_bust00_L", False)
-			util.set_parent_if_found(pmx, "cf_hit_bust02_L", "cf_s_bust00_L", True)
-			util.set_parent_if_found(pmx, "cf_hit_bust02_R", "cf_s_bust00_R", False)
-			util.set_parent_if_found(pmx, "cf_hit_bust02_R", "cf_s_bust00_R", True)
-			#- Change the pos
-			_bLeft = pmx.bones[fbx("cf_s_bust00_L")]; _tailLeft = vrcFlags.get("tail.l", [0,0,-1])
-			_bRght = pmx.bones[fbx("cf_s_bust00_R")]; _tailRght = vrcFlags.get("tail.r", [0,0,-1])
+			# #####--- Fix Chest
+			# fbx = util.get_bone_lambdas(pmx)[1]
+			# addToIdx("cf_d_bust00", "UpperChest" if "UpperChest" in nameMap else "Chest")
+			# #- Move Main Physic
+			# util.set_parent_if_found(pmx, "cf_hit_bust02_L", "cf_s_bust00_L", False)
+			# util.set_parent_if_found(pmx, "cf_hit_bust02_L", "cf_s_bust00_L", True)
+			# util.set_parent_if_found(pmx, "cf_hit_bust02_R", "cf_s_bust00_R", False)
+			# util.set_parent_if_found(pmx, "cf_hit_bust02_R", "cf_s_bust00_R", True)
+			# #- Change the pos
+			# _bLeft = pmx.bones[fbx("cf_s_bust00_L")]; _tailLeft = vrcFlags.get("tail.l", [0,0,-1])
+			# _bRght = pmx.bones[fbx("cf_s_bust00_R")]; _tailRght = vrcFlags.get("tail.r", [0,0,-1])
 			
-			_bLeft.pos = pmx.bones[fbx("cf_hit_bust02_L")].pos
-			_bRght.pos = pmx.bones[fbx("cf_hit_bust02_R")].pos
-			_bLeft.tail_usebonelink = False
-			_bLeft.tail = _tailLeft
-			_bRght.tail_usebonelink = False
-			_bRght.tail = _tailRght
+			# _bLeft.pos = pmx.bones[fbx("cf_hit_bust02_L")].pos
+			# _bRght.pos = pmx.bones[fbx("cf_hit_bust02_R")].pos
+			# _bLeft.tail_usebonelink = False
+			# _bLeft.tail = _tailLeft
+			# _bRght.tail_usebonelink = False
+			# _bRght.tail = _tailRght
 			
-			#### Delete everything else to orphan the physics
-			def get_or_ret(_name):
-				_idx = fbx(_name)
-				if _idx == -1: return None
-				_bone = pmx.bones[_idx]
-				_bone.name_jp = "DELME_" + _bone.name_jp
-				return _bone
+			# #### Delete everything else to orphan the physics
+			# def get_or_ret(_name):
+			# 	_idx = fbx(_name)
+			# 	if _idx == -1: return None
+			# 	_bone = pmx.bones[_idx]
+			# 	_bone.name_jp = "DELME_" + _bone.name_jp
+			# 	return _bone
 			
-			delDict.append(get_or_ret("胸親"))
-			delDict.append(get_or_ret("cf_d_bust01_L"))
-			delDict.append(get_or_ret("cf_j_bust01_L"))
-			delDict.append(get_or_ret("cf_d_bust02_L"))
-			delDict.append(get_or_ret("cf_d_bust01_R"))
-			delDict.append(get_or_ret("cf_j_bust01_R"))
-			delDict.append(get_or_ret("cf_d_bust02_R"))
-			delDict.append(get_or_ret("左胸操作"))
-			delDict.append(get_or_ret("AH1_L"))
-			delDict.append(get_or_ret("AH2_L"))
-			delDict.append(get_or_ret("右胸操作"))
-			delDict.append(get_or_ret("AH1_R"))
-			delDict.append(get_or_ret("AH2_R"))
-			delDict.append(get_or_ret("cf_d_hit_bust_L"))
-			delDict.append(get_or_ret("cf_d_hit_bust_R"))
-			delDict.append(get_or_ret("ChestRigidRoot"))
-			util.rename_bone(pmx, "cf_s_bust00_L", "Breast.L", True)
-			util.rename_bone(pmx, "cf_s_bust00_R", "Breast.R", True)
-			util.rename_bone(pmx, "cf_d_siri_L", "Butt.L", True)
-			util.rename_bone(pmx, "cf_d_siri_R", "Butt.R", True)
-			util.rename_bone(pmx, "cf_d_sk_top", "Skirt-Root", True)
+			# delDict.append(get_or_ret("胸親"))
+			# delDict.append(get_or_ret("cf_d_bust01_L"))
+			# delDict.append(get_or_ret("cf_j_bust01_L"))
+			# delDict.append(get_or_ret("cf_d_bust02_L"))
+			# delDict.append(get_or_ret("cf_d_bust01_R"))
+			# delDict.append(get_or_ret("cf_j_bust01_R"))
+			# delDict.append(get_or_ret("cf_d_bust02_R"))
+			# delDict.append(get_or_ret("左胸操作"))
+			# delDict.append(get_or_ret("AH1_L"))
+			# delDict.append(get_or_ret("AH2_L"))
+			# delDict.append(get_or_ret("右胸操作"))
+			# delDict.append(get_or_ret("AH1_R"))
+			# delDict.append(get_or_ret("AH2_R"))
+			# delDict.append(get_or_ret("cf_d_hit_bust_L"))
+			# delDict.append(get_or_ret("cf_d_hit_bust_R"))
+			# delDict.append(get_or_ret("ChestRigidRoot"))
+			# util.rename_bone(pmx, "cf_s_bust00_L", "Breast.L", True)
+			# util.rename_bone(pmx, "cf_s_bust00_R", "Breast.R", True)
+			# util.rename_bone(pmx, "cf_d_siri_L", "Butt.L", True)
+			# util.rename_bone(pmx, "cf_d_siri_R", "Butt.R", True)
+			# util.rename_bone(pmx, "cf_d_sk_top", "Skirt-Root", True)
+
+	# ^MOD: disable manipulating chest bones
+	# If the amount of bones is not an issue for you, you could disable that entire point by setting vrcFlags["detailed"] = True to False
+	# Its main effect are running said SFW Optimization and filling the Replacement Map with more values in Step 03 (within "if flag_order")
+	# But if you only want to disable the merger of ChestBones, then you could also just use the SFW Flag like you mentioned and remove everything below the "#####--- Fix Chest" within Step 03 (unless I missed a spot somewhere)
+	# If more people want that, I could look into adding a UserPrompt for that
 			
 		## TODO: Add Twists from tempTwist()
 	else:

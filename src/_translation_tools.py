@@ -311,7 +311,7 @@ bone_dict =  {
 "ひざD": "knee_D",   # "left/right knee_D"
 "足首D": "foot_D",   # "left/right foot_D"
 "足先EX": "toe_EX", # "left/right toes_EX"
-"胸": "breast",  # translates to "chest" or "breast"
+"胸": "chest",  # translates to "chest" or "breast"
 "乳": "breast",  # translates to "breast" or "milk"??? idk man language is wierd
 }
 
@@ -390,7 +390,7 @@ words_dict = {
 "お下げ": "pigtail",
 "腰": "waist",
 "舌": "tongue",
-"胸": "breast",  # translates to "chest" or "breast"
+"胸": "chest",  # translates to "chest" or "breast"
 "乳": "breast",  # translates to "breast" or "milk"??? idk man language is wierd
 "乳首": "nipple",
 "乳輪": "areola",
